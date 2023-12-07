@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+    
+    // environment {
+    //     GIT_URL = ""
+    //     GIT_CREDENTIAL_ID = ""
+    // }
+    stages {
+        stage("Checkout"){
+            steps {
+                checkout scmGit(
+                    branches: [[name: 'main']],
+                    userRemoteConfigs: [[url: 'https://github.com/raja-0940/sample-app.git']]
+                )
+            }
+        }
+        stage("Build"){
+            steps {
+                sh '''
+                    java -version
+                    mvn -version
+                    #mvn clean package
+                '''
+            }
+        }
+    }
+}
