@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RANDOM_NUM="${RANDOM}"
+RANDOM_NUM="$(date +%T | cut -d: -f3)"
 
 docker rmi `docker images -a -q`
 
