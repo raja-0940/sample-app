@@ -8,5 +8,7 @@ docker rmi `docker images -a -q`
 
 docker build -t sample-app:latest-${RANDOM_NUM} .
 
-docker run --name sample-app-${RANDOM_NUM} -p 8080:8080 sample-app:latest-${RANDOM_NUM}
+docker run -d --name sample-app-${RANDOM_NUM} sample-app:latest-${RANDOM_NUM}
+
+
 
