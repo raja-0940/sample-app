@@ -2,9 +2,9 @@
 
 RANDOM_NUM="$(date +%T | cut -d: -f3)"
 
-docker rmi `docker images -a -q`
-
 docker ps `docker ps -a -q`
+
+docker rmi `docker images -a -q`
 
 docker build -t sample-app:latest-${RANDOM_NUM} .
 
