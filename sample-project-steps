@@ -1,0 +1,211 @@
+A
+1. write a shell script to create devops_git devops_jenkins devops_docker devops_maven devops_shell devops_scripts directories in /usr/ location. Pass directory names as arguments.
+2. write a shell script to print "hello world" in reverse order. Pass "hello world" as argument and display total characters count.
+3. Write a shell script to multiply two numbers. Two numbers should be pass as arguments. If input is not given, display valid error and guide user to multiply two numbers
+
+B
+1. create java application
+2. Build java application using maven
+3. Containerize above application using Dockerfile
+4. Automate above application using shell script
+
+D
+1. Create a git repository
+2. Copy source code of above java application, Shell script and Dockerfile in the git repository
+3. Build CI jenkins pipeline based on above requirement
+
+===============================================================================================================================
+
+A:
+
+1. ./create-dir.sh devops_git devops_jenkins devops_docker devops_maven devops_shell devops_scripts
+
+#!/bin/bash
+
+if [ $# -lt 6 ]; then
+  echo "Please pass 6 arguments as follows"
+  echo "$0 <dir1> <dir2> <dir3> <dir4> <dir5> <dir6>"
+  exit 1
+fi
+
+mkdir -p /usr/dev_ops
+dest_dir="/usr/dev_ops"
+
+for dir_name in $@; do 
+  mkdir -p "$dest_dir/$dir_name"
+  if [ $? -eq 0 ]; then
+    echo "Created $dest_dir/$dir_name successfully"
+  else
+    echo "Error creating $dest_dir/$dir_name"
+  fi
+done
+
+echo "All directories are created in $dest_dir"
+ls -l $dest_dir
+
+2. ./reverse_message.sh "Shell scripting is easy to learn"
+
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+	echo "Please pass input message as one argument"
+	exit 1
+fi
+
+message="$1"
+
+reverse_message=$(echo "$message" | rev)
+
+echo "$reverse_message"
+
+echo "word count : $(echo "$reverse_message" | wc -w)"
+echo "total characters count : $(echo "$reverse_message" | wc -c)"
+
+3. ./mulsh 12 12
+
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+        echo "Please pass any two numbers as a arguments"
+        echo "Usage: $0 <num1> <num2>"
+        exit 1
+fi
+
+num1=$1
+num2=$2
+echo "Multiplication of two numbers are $(( $num1*$num2 ))"
+
+=========================================================================================================
+
+B
+1. Create java application.
+
+--> Installed java-17 and Maven :
+	JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.9.0.9-2.el8.x86_64
+	[root@DevOpsVM1 ~]# mvn -version
+	Apache Maven 3.9.6 (bc0240f3c744dd6b6ec2920b3cd08dcc295161ae)
+	Maven home: /opt/maven
+	Java version: 17.0.9, vendor: Red Hat, Inc., runtime: /usr/lib/jvm/java-17-openjdk-17.0.9.0.9-2.el8.x86_64
+	Default locale: en_US, platform encoding: UTF-8
+	OS name: "linux", version: "4.18.0-477.27.1.el8_8.x86_64", arch: "amd64", family: "unix"
+	[root@DevOpsVM1 ~]#
+-->
+	mkdir sample-java-app
+	cd sample-java-app
+	# Generate project structure with Maven.
+	mvn archetype:generate \
+		-DgroupId=com.example \
+		-DartifactId=hello-world \
+		-DarchetypeArtifactId=maven-archetype-quickstart \
+		-DarchetypeVersion=1.4 \
+		-DinteractiveMode=false
+		
+2. Build java application using maven.
+
+	mvn clean compile
+	mvn package
+	
+		
+3. Containerize above application using Dockerfile.
+
+	FROM maven:3.8.6-openjdk-8-slim
+
+	WORKDIR /app
+
+	COPY pom.xml .
+	RUN mvn clean package
+
+	COPY target/*.jar .
+	EXPOSE 8080
+
+	CMD ["java", "-jar", "*.jar"]
+	
+4. Automate above application using shell script.
+
+	#!/bin/bash
+	
+	RANDOM_NUM="$(date +%T | cut -d: -f3)"
+
+	docker ps `docker ps -a -q`
+
+	docker rmi `docker images -a -q`
+
+	docker build -t sample-app:latest-${RANDOM_NUM} .
+
+	docker run -d --name sample-app-${RANDOM_NUM} sample-app:latest-${RANDOM_NUM}
+
+	
+D
+1. Create a git repository.
+
+	git init or git clone <repo-url>
+
+2. Copy source code of above java application, Shell script and Dockerfile in the git repository.
+	
+	git add .
+	git commit -m "Created sample-java application"
+	git push
+
+	root@c84981v1:~/dev_ops/devops_maven/hello-world# ls -la
+	total 16
+	drwxr-xr-x 5 root root   94 Dec  7 00:49 .
+	drwxr-xr-x 3 root root   25 Dec  6 22:18 ..
+	-rw-r--r-- 1 root root  153 Dec  6 22:56 Dockerfile
+	drwxr-xr-x 7 root root  119 Dec  7 00:49 .git
+	-rw-r--r-- 1 root root 2657 Dec  6 22:18 pom.xml
+	-rwxr-xr-x 1 root root  168 Dec  6 23:16 run-app.sh
+	drwxr-xr-x 4 root root   30 Dec  6 22:18 src
+	drwxr-xr-x 9 root root 4096 Dec  6 22:18 target
+
+3. Build CI jenkins pipeline based on above requirement
+
+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
+
+echo "export JAVA_HOME=/usr/lib/jvm/java-17-oracle" >> ~/.bashrc
+echo "export MAVEN_HOME=/usr/share/maven" >> ~/.bashrc
+echo "export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin" >> ~/.bashrc
+
+
+pipeline {
+    agent any
+    environment {
+        REG_NAME = "docker.io"
+        REG = credentials('REGISTRY')
+    }
+    tools {
+        maven 'my_maven_3.9.6'
+    }
+    
+    stages {
+        stage("Checkout"){
+            steps {
+                checkout scmGit(
+                    branches: [[name: 'main']],
+                    userRemoteConfigs: [[url: 'https://github.com/raja-0940/sample-app.git']]
+                )
+            }
+        }
+        stage("Build"){
+            steps {
+                sh 'mvn clean compile package'
+            }
+        }
+        stage("Build Image"){
+            steps {
+                sh'''
+                    RANDOM_NUM="$(date +%T | cut -d: -f3)"
+                    docker build -t raja0940/sample-app:latest-${RANDOM_NUM} .
+                    docker login -u ${REG_USR} -p ${REG_PSW} ${REG_NAME}
+                    docker push raja0940/sample-app:latest-${RANDOM_NUM}
+                '''
+            }
+        }
+        stage("Run sample-app"){
+            steps {
+                sh'sh ./run-app.sh'
+            }
+        }
+    }
+}
+
+
